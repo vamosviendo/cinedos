@@ -38,7 +38,11 @@ class TestCinemaModel:
         assert str(cinema) == "Showcase Nordelta (Tigre)"
 
     def test_ciudad_default_es_buenos_aires(self):
-        cinema = CinemaFactory()
+        cinema = Cinema.objects.create(
+            name="Cine Test",
+            address="Calle Falsa 123",
+            neighborhood="Palermo",
+        )
         assert cinema.city == "Buenos Aires"
 
     def test_puede_tener_multiples_promociones(self):
@@ -66,8 +70,24 @@ class TestMovieModel:
         assert str(movie) == "El Padrino"
 
     def test_titulo_original_puede_estar_vacio(self):
-        movie = MovieFactory(original_title="")
+        movie = Movie.objects.create(
+            title="Película 1",
+            rating="ATP",
+            duration_minutes=100,
+        )
         assert movie.original_title == ""
+
+    def test_titulo_original_es_opcional_en_formularios(self):
+        from django.forms import ModelForm
+        from cartelera.models import Movie
+
+        class MovieForm(ModelForm):
+            class Meta:
+                model = Movie
+                fields = ["title", "original_title", "rating"]
+
+        form = MovieForm(data={"title": "Película 1", "rating": "ATP", "original_title": ""})
+        assert form.is_valid(), form.errors
 
     def test_duracion_puede_ser_nula(self):
         movie = MovieFactory(duration_minutes=None)
@@ -183,10 +203,17 @@ class TestAttendanceModel:
     def test_str_incluye_usuario_y_funcion(self):
         user = UserFactory(username="juancito")
         attendance = AttendanceFactory(user=user)
+        assert str(attendance.showtime) in str(attendance)
         assert "juancito" in str(attendance)
 
     def test_estado_default_es_looking(self):
-        attendance = AttendanceFactory()
+        user = UserFactory(username="juancito")
+        showtime = ShowtimeFactory()
+        attendance = Attendance.objects.create(
+            user=user,
+            showtime=showtime,
+            note="",
+        )
         assert attendance.status == Attendance.STATUS_LOOKING
 
     def test_un_usuario_no_puede_anotarse_dos_veces_a_la_misma_funcion(self):
@@ -203,13 +230,13 @@ class TestAttendanceModel:
         assert a1.pk != a2.pk
 
     def test_nota_puede_estar_vacia(self):
-        attendance = AttendanceFactory(note="")
+        attendance = AttendanceFactory()
         assert attendance.note == ""
 
 
-# ---------------------------------------------------------------------------
-# Match
-# ---------------------------------------------------------------------------
+# # ---------------------------------------------------------------------------
+# # Match
+# # ---------------------------------------------------------------------------
 
 @pytest.mark.django_db
 class TestMatchModel:
@@ -221,9 +248,17 @@ class TestMatchModel:
         resultado = str(match)
         assert "ana" in resultado
         assert "beto" in resultado
+        assert str(match.showtime) in resultado
 
     def test_estado_default_es_pending(self):
-        match = MatchFactory()
+        showtime = ShowtimeFactory()
+        requester = UserFactory()
+        requested = UserFactory()
+        match = Match.objects.create(
+            showtime=showtime,
+            requester=requester,
+            requested=requested,
+        )
         assert match.status == Match.STATUS_PENDING
 
     def test_puede_confirmarse(self):

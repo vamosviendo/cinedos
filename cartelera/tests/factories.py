@@ -13,6 +13,7 @@ from cartelera.models import Attendance, Cinema, Match, Movie, Promotion, Showti
 class UserFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = User
+        skip_postgeneration_save = True
 
     username = factory.Sequence(lambda n: f"usuario_{n}")
     email = factory.LazyAttribute(lambda obj: f"{obj.username}@ejemplo.com")
@@ -73,7 +74,6 @@ class AttendanceFactory(factory.django.DjangoModelFactory):
     user = factory.SubFactory(UserFactory)
     showtime = factory.SubFactory(ShowtimeFactory)
     status = Attendance.STATUS_LOOKING
-    note = ""
 
 
 class MatchFactory(factory.django.DjangoModelFactory):
