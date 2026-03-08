@@ -30,7 +30,6 @@ from cartelera.tests.factories import (
 # Cinema
 # ---------------------------------------------------------------------------
 
-@pytest.mark.django_db
 class TestCinemaModel:
 
     def test_str_incluye_nombre_y_barrio(self):
@@ -68,7 +67,6 @@ class TestCinemaModel:
 # Movie
 # ---------------------------------------------------------------------------
 
-@pytest.mark.django_db
 class TestMovieModel:
 
     def test_str_es_el_titulo(self):
@@ -116,7 +114,6 @@ class TestMovieModel:
 # Promotion
 # ---------------------------------------------------------------------------
 
-@pytest.mark.django_db
 class TestPromotionModel:
 
     def test_str_incluye_cine_y_descripcion(self):
@@ -156,7 +153,6 @@ class TestPromotionModel:
 # Showtime
 # ---------------------------------------------------------------------------
 
-@pytest.mark.django_db
 class TestShowtimeModel:
 
     def test_str_incluye_pelicula_cine_y_fecha(self):
@@ -223,7 +219,6 @@ class TestShowtimeModel:
 # Attendance
 # ---------------------------------------------------------------------------
 
-@pytest.mark.django_db
 class TestAttendanceModel:
 
     def test_str_incluye_usuario_y_funcion(self):
@@ -264,7 +259,6 @@ class TestAttendanceModel:
 # # Match
 # # ---------------------------------------------------------------------------
 
-@pytest.mark.django_db
 class TestMatchModel:
 
     def test_str_incluye_ambos_usuarios(self):
