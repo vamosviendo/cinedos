@@ -11,6 +11,11 @@ class Cinema(models.Model):
     neighborhood = models.CharField("barrio/localidad", max_length=100)
     city = models.CharField("ciudad", max_length=100, default="Buenos Aires")
 
+    class Meta:
+        verbose_name = "cine"
+        verbose_name_plural = "cines"
+        ordering = ["name"]
+
     def __str__(self):
         return f"{self.name} ({self.neighborhood})"
 
@@ -31,6 +36,11 @@ class Movie(models.Model):
     duration_minutes = models.PositiveIntegerField(
         "duración (minutos)", null=True, blank=True
     )
+
+    class Meta:
+        verbose_name = "película"
+        verbose_name_plural = "películas"
+        ordering = ["title"]
 
     def __str__(self):
         return self.title
@@ -60,6 +70,10 @@ class Promotion(models.Model):
     is_active = models.BooleanField("activa", default=True)
     valid_from = models.DateField("válida desde", null=True, blank=True)
     valid_until = models.DateField("válida hasta", null=True, blank=True)
+
+    class Meta:
+        verbose_name = "promoción"
+        verbose_name_plural = "promociones"
 
     def __str__(self):
         return f"{self.cinema.name} — {self.description}"
@@ -107,6 +121,9 @@ class Showtime(models.Model):
     )
 
     class Meta:
+        verbose_name = "función"
+        verbose_name_plural = "funciones"
+        ordering = ["datetime", "cinema", "screen"]
         # No puede haber dos funciones idénticas en el mismo cine/sala/hora
         constraints = [
             models.UniqueConstraint(
@@ -171,6 +188,10 @@ class Attendance(models.Model):
     )
 
     class Meta:
+        verbose_name = "asistencia"
+        verbose_name_plural = "asistencias"
+        ordering = ["created_at"]
+
         constraints = [
             # Un usuario no puede anotarse dos veces a la misma función
             models.UniqueConstraint(
@@ -214,6 +235,13 @@ class Match(models.Model):
     status = models.CharField(
         "estado", max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING
     )
+    created_at = models.DateTimeField("propuesto el", auto_now_add=True)
+    updated_at = models.DateTimeField("actualizado el", auto_now=True)
+
+    class Meta:
+        verbose_name = "match"
+        verbose_name_plural = "matches"
+        ordering = ["-created_at"]
 
     def __str__(self):
         return f"{self.requester} - {self.requested} para {self.showtime}"

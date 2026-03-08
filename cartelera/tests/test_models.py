@@ -37,6 +37,12 @@ class TestCinemaModel:
         cinema = CinemaFactory(name="Showcase Nordelta", neighborhood="Tigre")
         assert str(cinema) == "Showcase Nordelta (Tigre)"
 
+    def test_se_ordena_por_nombre(self):
+        cinema1 = CinemaFactory(name="Showcase Nordelta")
+        cinema2 = CinemaFactory(name="Abasto Shopping")
+        cinema3 = CinemaFactory(name="Cine Test")
+        assert list(Cinema.objects.all()) == [cinema2, cinema3, cinema1]
+
     def test_ciudad_default_es_buenos_aires(self):
         cinema = Cinema.objects.create(
             name="Cine Test",
@@ -68,6 +74,12 @@ class TestMovieModel:
     def test_str_es_el_titulo(self):
         movie = MovieFactory(title="El Padrino")
         assert str(movie) == "El Padrino"
+
+    def test_se_ordenan_por_titulo(self):
+        movie1 = MovieFactory(title="El Padrino")
+        movie2 = MovieFactory(title="Zama")
+        movie3 = MovieFactory(title="Amarcord")
+        assert list(Movie.objects.all()) == [movie3, movie1, movie2]
 
     def test_titulo_original_puede_estar_vacio(self):
         movie = Movie.objects.create(
@@ -157,6 +169,20 @@ class TestShowtimeModel:
         assert "Village Recoleta" in resultado
         assert "21/07/2025" in resultado
         assert "20:30" in resultado
+
+    def test_se_ordena_por_fecha_y_hora_cine_y_sala(self):
+        cinema1 = CinemaFactory(name="Atlas Recoleta")
+        cinema2 = CinemaFactory(name="Showcase Haedo")
+        sala1 = "Sala 1"
+        sala2 = "Sala 2"
+        dt1 = timezone.datetime(2025, 7, 21, 20, 30, tzinfo=timezone.get_current_timezone())
+        dt2 = timezone.datetime(2025, 7, 21, 22, 50, tzinfo=timezone.get_current_timezone())
+        showtime1 = ShowtimeFactory(datetime=dt2, cinema=cinema1, screen=sala2)
+        showtime2 = ShowtimeFactory(datetime=dt2, cinema=cinema1, screen=sala1)
+        showtime3 = ShowtimeFactory(datetime=dt1, cinema=cinema2, screen=sala1)
+        showtime4 = ShowtimeFactory(datetime=dt1, cinema=cinema1, screen=sala1)
+
+        assert list(Showtime.objects.all()) == [showtime4, showtime3, showtime2, showtime1]
 
     def test_funcion_futura_es_upcoming(self):
         showtime = ShowtimeFactory(
