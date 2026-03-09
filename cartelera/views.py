@@ -1,7 +1,7 @@
 from django.utils import timezone
 from django.views.generic import ListView
 
-from cartelera.models import Showtime
+from cartelera.models import Attendance, Showtime
 
 
 ORDEN_MAP = {
@@ -41,3 +41,15 @@ class ShowtimeListView(ListView):
             qs = qs.order_by(*ORDEN_MAP[orden])
 
         return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.user.is_authenticated:
+            context["user_showtimes"] = set(
+                Attendance.objects
+                    .filter(user=self.request.user)
+                    .exclude(status=Attendance.STATUS_CANCELLED)
+                    .values_list("id", flat=True)
+            )
+
+        return context
