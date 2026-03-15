@@ -314,3 +314,25 @@ class TestShowtimeListUser:
 
         user_showtimes = response.context["user_showtimes"]
         assert asistencia_otro.showtime_id not in user_showtimes
+
+    def test_user_showtimes_contiene_ids_de_funciones_no_de_asistencias(self, client):
+        """user_showtimes debe contener IDs de Showtime, no de Attendance.
+
+        Si hay objetos previos en la DB, el id de Attendance difiere del
+        showtime_id. El bug devolvía ids de Attendance en lugar de showtime_ids.
+        """
+        user = UserFactory()
+        client.force_login(user)
+
+        # Crear una función extra para que los IDs se desincronicen
+        ShowtimeFactory()
+
+        asistencia = AttendanceFactory(user=user, status=Attendance.STATUS_LOOKING)
+        # A esta altura: asistencia.id != asistencia.showtime_id (con alta probabilidad)
+
+        url = reverse("cartelera:showtime-list")
+        response = client.get(url)
+
+        user_showtimes = response.context["user_showtimes"]
+        assert asistencia.showtime_id in user_showtimes
+        assert asistencia.id not in user_showtimes or asistencia.id == asistencia.showtime_id

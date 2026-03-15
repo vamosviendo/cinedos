@@ -49,7 +49,7 @@ class ShowtimeListView(ListView):
                 Attendance.objects
                     .filter(user=self.request.user)
                     .exclude(status=Attendance.STATUS_CANCELLED)
-                    .values_list("id", flat=True)
+                    .values_list("showtime_id", flat=True)
             )
 
         return context
