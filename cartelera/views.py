@@ -1,5 +1,5 @@
 from django.utils import timezone
-from django.views.generic import ListView
+from django.views.generic import DetailView, ListView
 
 from cartelera.models import Attendance, Showtime
 
@@ -52,4 +52,17 @@ class ShowtimeListView(ListView):
                     .values_list("showtime_id", flat=True)
             )
 
+        return context
+
+
+class ShowtimeDetailView(DetailView):
+    model = Showtime
+    context_object_name = "showtime"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["attendances"] = Attendance.objects.filter(
+            showtime=self.object,
+            status=Attendance.STATUS_LOOKING
+        )
         return context
