@@ -1,7 +1,11 @@
 from django.urls import reverse
 
 from cartelera.models import Attendance
-from cartelera.tests.factories import AttendanceFactory, ShowtimeFactory
+from cartelera.tests.factories import (
+    AttendanceFactory,
+    ShowtimeFactory,
+    UserFactory,
+)
 
 
 class TestShowtimeDetailBase:
@@ -74,3 +78,44 @@ class TestShowtimeDetailContext:
         url = reverse("cartelera:showtime-detail", kwargs={"pk": showtime.pk})
         response = client.get(url)
         assert asistencia_otra not in list(response.context["attendances"])
+class TestShowtimeDetailUser:
+    """
+    Tests — Iteración 3: usuario autenticado en ShowtimeDetailView
+    Qué verificamos:
+      1. Usuario anónimo: 'user_attendance' no está en el contexto.
+      2. Usuario autenticado sin asistencia: 'user_attendance' es None.
+      3. Usuario autenticado con asistencia: 'user_attendance' es su Attendance.
+    """
+
+    def test_usuario_anonimo_no_recibe_user_attendance(self, client):
+        showtime = ShowtimeFactory()
+        url = reverse("cartelera:showtime-detail", kwargs={"pk": showtime.pk})
+        response = client.get(url)
+        assert "user_attendance" not in response.context
+
+    def test_usuario_autenticado_sin_asistencia_recibe_none(self, client):
+        user = UserFactory()
+        client.force_login(user)
+        showtime = ShowtimeFactory()
+        url = reverse("cartelera:showtime-detail", kwargs={"pk": showtime.pk})
+        response = client.get(url)
+        assert response.context["user_attendance"] is None
+
+    def test_usuario_autenticado_con_asistencia_recibe_su_attendance(self, client):
+        user = UserFactory()
+        client.force_login(user)
+        showtime = ShowtimeFactory()
+        asistencia = AttendanceFactory(user=user, showtime=showtime)
+        url = reverse("cartelera:showtime-detail", kwargs={"pk": showtime.pk})
+        response = client.get(url)
+        assert response.context["user_attendance"] == asistencia
+
+    def test_user_attendance_no_muestra_asistencias_a_otras_funciones(self, client):
+        user = UserFactory()
+        client.force_login(user)
+        showtime = ShowtimeFactory()
+        otra_funcion = ShowtimeFactory()
+        AttendanceFactory(user=user, showtime=otra_funcion)
+        url = reverse("cartelera:showtime-detail", kwargs={"pk": showtime.pk})
+        response = client.get(url)
+        assert response.context["user_attendance"] is None

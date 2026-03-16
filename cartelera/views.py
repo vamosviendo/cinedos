@@ -63,6 +63,11 @@ class ShowtimeDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context["attendances"] = Attendance.objects.filter(
             showtime=self.object,
-            status=Attendance.STATUS_LOOKING
+            status=Attendance.STATUS_LOOKING,
         )
+        if self.request.user.is_authenticated:
+            context["user_attendance"] = Attendance.objects.filter(
+                user=self.request.user,
+                showtime=self.object,
+            ).first()
         return context
