@@ -1,5 +1,7 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView, ListView, View
 
 from cartelera.models import Attendance, Showtime
 
@@ -71,3 +73,22 @@ class ShowtimeDetailView(DetailView):
                 showtime=self.object,
             ).first()
         return context
+
+
+class AttendanceCreateView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        showtime = get_object_or_404(Showtime, pk=pk)
+        Attendance.objects.get_or_create(
+            user=request.user,
+            showtime=showtime,
+        )
+        return redirect("cartelera:showtime-detail", pk=pk)
+
+
+class AttendanceCancelView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        attendance = get_object_or_404(Attendance, pk=pk)
+        attendance.status = Attendance.STATUS_CANCELLED
+        attendance.full_clean()
+        attendance.save()
+        return redirect("cartelera:showtime-detail", pk=pk)
